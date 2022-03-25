@@ -1,0 +1,31 @@
+{
+  "className": "Premiere",
+  "edited": false,
+  "selected": true,
+  "studentList": [
+    {
+      "id": 1,
+      "nom": "Pouzol",
+      "prenom": "Hadrien",
+      "edit": false
+    },
+    {
+      "id": 2,
+      "nom": "Doussineau",
+      "prenom": "Louis",
+      "edit": false
+    },
+    {
+      "id": 3,
+      "nom": "Bassot",
+      "prenom": "Enzo",
+      "edit": false
+    },
+    {
+      "id": 4,
+      "nom": "Audoin",
+      "prenom": "Anthony",
+      "edit": false
+    }
+  ]
+}

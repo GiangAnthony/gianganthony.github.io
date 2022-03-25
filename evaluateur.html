@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Evaluateur</title>
+
+    <link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+
+</head>
+
+<body>
+    <div id="evaluation">
+
+        <h1>Listes des éléves</h1>
+        <students v-bind:students="studentList" v-bind:criterias="criteriaList" v-bind:notes="notes" @add="addNotes">
+        </students>
+
+        <button v-on:click="csvExport" class="btnExport">Exporter les résultats en csv</button>
+
+    </div>
+
+    <br>
+
+    <a href="Index.html">Retour</a>
+
+    <template id="template-student">
+        <ul>
+            <li v-for="(student, index) in students">
+                <span>{{student.nom}} {{student.prenom}}</span>
+
+                <button class="editBtn" v-show="!student.edit" v-on:click="student.edit=true"> <i
+                        class="fa fa-edit"></i> </button>
+                <button class="editBtn" v-show="student.edit" v-on:click="student.edit=false"> <i
+                        class="fa fa-check"></i></button>
+                <br><br>
+                <div v-if="student.edit" v-for="(criteria, indexCri) in criterias">
+                    <ul>
+                        <li>
+                            Critére : {{criteria.nom}}
+                        </li>
+                        <li>
+                            Note Minimale : {{criteria.minMark}}
+                        </li>
+                        <li>
+                            Note Maximale : {{criteria.maxMark}}
+                        </li>
+                        <li>
+                            Moyenne des notes : {{criteria.averageMark}}
+                        </li>
+                    </ul>
+
+                    <input class="slider" type="range" min="0" max="100" value=getActualMark(student.id,test.id)
+                        v-on:change="saveMarks(student.id, criteria.id, student.nom, student.prenom, criteria.nom,$event)">
+                    Note actuelle : {{ getActualMark(student.id,criteria.id) }}
+                    <br><br>
+                </div>
+
+            </li>
+        </ul>
+    </template>
+
+    <script>
+
+        function ArrayAvg(myArray) {
+            let sum = parseInt(0);
+            myArray.forEach(element => {
+                sum = sum + parseInt(element);
+            })
+
+            return sum / myArray.length;
+        }
+
+        Vue.component('students', {
+            props: {
+                students: Array,
+                criterias: Array,
+                notes: Array,
+            },
+            template: "#template-student",
+            methods: {
+                saveMarks(idEleve, idCritere, nomEleve, prenomEleve, nomCritere, event) {
+                    // console.log("etst")
+                    this.$emit('add', idEleve, idCritere, nomEleve, prenomEleve, nomCritere, event.target.value);
+                },
+                getActualMark(idEleve, idCritere) {
+                    // console.log("notes")
+                    let val = 0;
+                    this.notes.forEach(element => {
+                        // console.log("foreach")
+                        if (element.identifiantEleve === idEleve && element.identifiantCritere === idCritere) {
+                            // console.log(element.note)
+                            val = element.note
+                            return val;
+                        }
+                    });
+                    return val;
+                }
+            }
+        })
+
+        let app = new Vue({
+            el: "#evaluation",
+            data: {
+                studentList:
+                    [
+
+                    ],
+                criteriaList:
+                    [
+
+                    ],
+                notes:
+                    [
+
+                    ],
+            },
+            methods: {
+                addNotes: function (idEleve, idCritere, nomEleve, prenomEleve, nomCritere, note) {
+
+                    let newNote =
+                    {
+                        identifiantEleve: idEleve,
+                        identifiantCritere: idCritere,
+                        nomEleve: nomEleve,
+                        prenomEleve: prenomEleve,
+                        nomCritere: nomCritere,
+                        note: note
+                    }
+                        ;
+                    let find = true;
+                    let tab = [];
+                    if (this.notes.length) {
+                        this.notes.every(element => {
+                            if (element.identifiantEleve === idEleve && element.identifiantCritere === idCritere) {
+                                element.note = note;
+                                find = true;
+                                return false;
+                            } else {
+                                find = false;
+                                return true;
+                            }
+                        });
+                        if (!find) {
+                            this.notes.push(newNote);
+                        }
+                    } else {
+                        this.notes.push(newNote);
+                    }
+                    this.notes.forEach(element => {
+                        if (element.identifiantCritere === idCritere) {
+                            tab.push(element.note);
+                        }
+                    })
+                    this.criteriaList.forEach(element => {
+                        if (element.id === idCritere) {
+                            element.minMark = Math.min(...tab);
+                            element.maxMark = Math.max(...tab);
+                            element.averageMark = Math.round(ArrayAvg(tab) * 100) / 100;
+                        }
+                    })
+                    localStorage.setItem('notes', JSON.stringify(this.notes));
+                    localStorage.setItem('criteriaList', JSON.stringify(this.criteriaList));
+                },
+                csvExport: function () {
+                    let arrData = this.notes;
+                    let csvContent = "data:text/csv;charset=utf-8,";
+                    csvContent += [
+                        Object.keys(arrData[0]).join(";"),
+                        ...arrData.map(item => Object.values(item).join(";"))
+                    ]
+                        .join("\n")
+                        .replace(/(^\[)|(\]$)/gm, "");
+
+                    const data = encodeURI(csvContent);
+                    const link = document.createElement("a");
+                    link.setAttribute("href", data);
+                    link.setAttribute("download", "export.csv");
+                    link.click();
+                },
+            },
+            mounted() {
+                if (localStorage.getItem('studentList')) this.studentList = JSON.parse(localStorage.getItem('studentList'));
+                if (localStorage.getItem('criteriaList')) this.criteriaList = JSON.parse(localStorage.getItem('criteriaList'));
+                if (localStorage.getItem('notes')) this.notes = JSON.parse(localStorage.getItem('notes'));
+            },
+
+        })
+    </script>
+
+</body>
+
+</html>

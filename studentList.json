@@ -1,0 +1,31 @@
+{
+  "className": "Terminale",
+  "edited": false,
+  "selected": true,
+  "studentList": [
+    {
+      "id": 1,
+      "nom": "Giang",
+      "prenom": "Anthony",
+      "edit": false
+    },
+    {
+      "id": 2,
+      "nom": "Vedrine",
+      "prenom": "Alexandre",
+      "edit": false
+    },
+    {
+      "id": 3,
+      "nom": "Bourgeois",
+      "prenom": "Thomas",
+      "edit": false
+    },
+    {
+      "id": 4,
+      "nom": "Faye",
+      "prenom": "Alexis",
+      "edit": false
+    }
+  ]
+}

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Liste des classes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+</head>
+
+<body>
+    <a href="admin.html">Retour</a>
+    <div id="classesList">
+        <list v-bind:items="classesList" v-bind:trash="true" v-bind:edit="true" v-on:btn-trash="btnTrash($event)"
+            v-on:toggle-edited="toggleEdited($event)" v-on:btn-select="selectClass($event)">
+            <template v-slot:header>
+                <h2>Listes de classes</h2>
+            </template>
+
+            <template v-slot:itemview="item">
+                <p>{{ item.item.className }}</p>
+            </template>
+
+            <template v-slot:itemedit="item">
+                <div class="form-item">
+                    <input class="input-nom" v-model="item.item.className">
+                </div>
+            </template>
+        </list>
+    </div>
+
+    <template id="list-template-slot">
+        <div>
+            <slot name="header"></slot>
+
+            <ul class="list">
+                <li v-for="item in items" v-bind:key="item.id" class="item">
+                    <div class="left">
+                        <slot v-if="!item.edited" name="itemview" v-bind:item="item"></slot>
+                        <slot v-else name="itemedit" v-bind:item="item"></slot>
+                    </div>
+                    <div class="right">
+                        <div v-if="!item.selected">
+                            <button type="button" class="btn btn-info btn-lg" @click="$emit('btn-select', item)">Select</button>
+                        </div>
+
+                        <div v-if="edit">
+                            <button type="button" class="btn btn-warning btn-lg" v-show="!item.edited" @click="$emit('toggle-edited',item)">Edit</button>
+                            <button type="button" class="btn btn-success btn-lg" v-show="item.edited" @click="$emit('toggle-edited',item)">Check</button>
+                        </div>
+
+                        <div v-if="trash">
+                            <button type="button" class="btn btn-danger btn-lg" @click="$emit('btn-trash', item)">Trash</button>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </template>
+
+    <script>
+        Vue.component('list', {
+
+            props: {
+                items: Array,
+                edit: Boolean,
+                trash: Boolean
+            },
+            template: "#list-template-slot",
+
+            data: function () {
+                return {}
+            },
+
+            computed: {
+
+            },
+
+            methods: {
+
+            }
+
+        });
+
+        var classesList = [];
+
+        if (localStorage.getItem('classesList')) {
+            classesList = JSON.parse(localStorage.getItem('classesList'));
+        }
+
+        var store = {
+
+            state: classesList,
+
+            remove(item) {
+                this.state.splice(this.state.indexOf(item), 1)
+                localStorage.setItem('classesList', JSON.stringify(this.state));
+            },
+
+            toggle_edited(item) {
+                item.edited = !item.edited
+                localStorage.setItem('classesList', JSON.stringify(this.state));
+            },
+
+            selectClass(item) {
+                this.state.forEach(element => {
+                    element.selected = false;
+                });
+                this.state[this.state.indexOf(item)].selected = true;
+                localStorage.setItem('classesList', JSON.stringify(this.state));
+                localStorage.setItem('studentList', JSON.stringify(item.studentList));
+            }
+        }
+
+        let app = new Vue({
+            el: '#classesList',
+            data() {
+                return {
+                    classesList: classesList,
+                    trash: false,
+                    edit: false,
+                    item: {
+                        className: '',
+                    }
+                }
+            },
+            methods: {
+                btnTrash: function (className) {
+                    store.remove(className)
+                },
+
+                toggleEdited: function (className) {
+                    store.toggle_edited(className)
+                },
+
+                selectClass: function (classe) {
+                    store.selectClass(classe)
+                }
+            }
+        })
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Importer une classe</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+</head>
+
+<body>
+    <div id="importList" class="custom-file">
+        <p v-if="depotOk" style="color: green; font-style: italic;">{{ messageDepot }}</p>
+        <input type="file" id="file" ref="myFiles" class="custom-file-input" accept="application/json"
+            @change="previewFiles" multiple>
+    </div>
+
+    <a class="btnRetour" href="admin.html">Retour</a>
+
+    <script>
+        let app = new Vue({
+            el: '#importList',
+            data() {
+                return {
+                    files: [],
+                    messageDepot: '',
+                    etudiants: [],
+                    depotOk: false,
+                }
+            },
+            methods: {
+                previewFiles() {
+                    this.files = this.$refs.myFiles.files
+                    const reader = new FileReader();
+                    reader.onload = e => this.$emit(this.messageDepot, e.target.result);
+                    reader.readAsText(this.files[0])
+
+                    fetch(this.files[0].name)
+                        .then(response => response.text())
+                        .then(data => {
+                            this.depotOk = true;
+                            depot = JSON.parse(data);
+                            this.etudiants = depot.studentList;
+                            this.messageDepot = "Import réussi.";
+
+                            localStorage.removeItem('notes');
+
+                            localStorage.setItem('studentList', JSON.stringify(this.etudiants));
+
+                            var classesList = [];
+
+                            if (localStorage.getItem('classesList')) {
+                                classesList = JSON.parse(localStorage.getItem('classesList'));
+                            }
+
+                            classesList.every(classe => {
+                                classe.selected = false;
+                            })
+
+                            classesList.push(depot);
+
+                            localStorage.setItem('classesList', JSON.stringify(classesList));
+
+
+                            if (localStorage.getItem('criteriaList')) {
+                                var criteres = JSON.parse(localStorage.getItem('criteriaList'));
+                                criteres.every(critere => {
+                                    critere.averageMark = 0;
+                                    critere.minMark = 0;
+                                    critere.maxMark = 0;
+                                })
+                                localStorage.setItem('criteriaList', JSON.stringify(criteres));
+                            }
+                        });
+                }
+            }
+        })
+
+    </script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+
+</html>

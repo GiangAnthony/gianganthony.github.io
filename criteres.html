@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Critères</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+</head>
+
+<body>
+    <div id="criteres">
+        <list v-bind:items="criteres" v-bind:trash="true" v-bind:edit="true" v-on:btn-trash="btnTrash($event)"
+            v-on:toggle-edited="toggleEdited($event)">
+            <template v-slot:header>
+                <h2>Critères</h2>
+            </template>
+
+            <template v-slot:itemview="item">
+                <p>{{ item.item.nom }}</p>
+            </template>
+
+            <template v-slot:itemedit="item">
+                <div class="form-item">
+                    <input class="input-nom" v-model="item.item.nom">
+                </div>
+            </template>
+
+        </list>
+        <form-add v-bind:item="item" v-on:btn-add="btnAdd($event)">
+            <template v-slot:header>
+                <h2>Ajouter un critère ?</h2>
+            </template>
+        </form-add>
+        <a href="admin.html">Retour</a>
+    </div>
+    <template id="list-template-slot">
+        <div>
+            <slot name="header"></slot>
+
+            <ul class="list">
+                <li v-for="item in items" v-bind:key="item.id" class="item">
+                    <div class="left">
+                        <slot v-if="!item.edited" name="itemview" v-bind:item="item"></slot>
+                        <slot v-else name="itemedit" v-bind:item="item"></slot>
+                    </div>
+                    <div class="right">
+                        <div v-if="edit">
+                            <button type="button" class="btn btn-warning btn-lg" v-show="!item.edited" @click="$emit('toggle-edited',item)">Edit</button>
+                            <button type="button" class="btn btn-success btn-lg" v-show="item.edited" @click="$emit('toggle-edited',item)">Check</button>
+                        </div>
+
+                        <div v-if="trash">
+                            <button type="button" class="btn btn-danger btn-lg" @click="$emit('btn-trash', item)">Trash</button>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </template>
+    <template id="form-template">
+        <div>
+            <slot name="header"></slot>
+
+            <div class="form-add">
+                <input type="text" placeholder="critère" v-model.lazy="item.nom" />
+
+                <button type="button" class="btn btn-secondary btn-lg" @click="btn_add">Ajouter</button>
+            </div>
+
+            <p v-if="!formOk" style="color: red; font-style: italic;">{{ messageErreur }}</p>
+        </div>
+    </template>
+
+</body>
+<script>
+    Vue.component('list', {
+
+        props: {
+            items: Array,
+            trash: Boolean,
+            edit: Boolean
+        },
+        template: "#list-template-slot",
+
+        data: function () {
+            return {}
+        },
+
+        computed: {
+
+        },
+
+        methods: {
+
+        }
+
+    });
+
+    Vue.component('form-add', {
+
+        props: {
+            item: Object
+        },
+        template: "#form-template",
+
+        data: function () {
+            return { formOk: true }
+        },
+
+        computed: {
+            messageErreur: function () {
+                return "Veuillez compléter tous les champs du formulaire.";
+            },
+
+        },
+
+        methods: {
+            btn_add: function () {
+                if (this.item.nom) {
+                    this.formOk = true;
+                    this.$emit('btn-add', this.item);
+
+                    this.item.nom = '';
+                } else {
+                    this.formOk = false;
+                }
+            }
+        }
+
+    });
+
+    var criteres = [];
+
+    if (localStorage.getItem('criteriaList')) {
+        criteres = JSON.parse(localStorage.getItem('criteriaList'));
+    }
+
+    var store = {
+
+        state: criteres,
+
+        remove(item) {
+            this.state.splice(this.state.indexOf(item), 1)
+            localStorage.setItem('criteriaList', JSON.stringify(this.state));
+        },
+
+        toggle_edited(item) {
+            item.edited = !item.edited
+        },
+
+        max_id() {
+            if (this.state.length == 0) return 0
+            let max = this.state[0].id
+            this.state.forEach(e => {
+                if (max <= e.id) max = e.id
+            })
+            return max
+        },
+
+        add(obj) {
+            this.state.push({
+                edited: false,
+                id: this.max_id() + 1,
+                nom: obj.nom,
+                maxMark: 0,
+                minMark: 0,
+                averageMark: 0
+            })
+            localStorage.setItem('criteriaList', JSON.stringify(this.state));
+        }
+    }
+
+    var App = new Vue({
+        el: '#criteres',
+
+        data: {
+            criteres: store.state,
+            trash: false,
+            edit: false,
+            item: {
+                nom: '',
+            }
+        },
+
+        methods: {
+            btnTrash: function (critere) {
+                store.remove(critere)
+            },
+
+            toggleEdited: function (critere) {
+                store.toggle_edited(critere)
+            },
+
+            btnAdd: function (item) {
+                store.add(item);
+            }
+        },
+
+    })
+</script>
+
+</html>

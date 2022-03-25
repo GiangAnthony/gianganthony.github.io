@@ -109,6 +109,7 @@
                     element.selected = false;
                 });
                 this.state[this.state.indexOf(item)].selected = true;
+                localStorage.removeItem('notes');
                 localStorage.setItem('classesList', JSON.stringify(this.state));
                 localStorage.setItem('studentList', JSON.stringify(item.studentList));
             }

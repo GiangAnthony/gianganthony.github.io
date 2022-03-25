@@ -43,16 +43,20 @@
                     </div>
                     <div class="right">
                         <div v-if="!item.selected">
-                            <button type="button" class="btn btn-info btn-lg" @click="$emit('btn-select', item)">Select</button>
+                            <button type="button" class="btn btn-info btn-lg"
+                                @click="$emit('btn-select', item)">Select</button>
                         </div>
 
                         <div v-if="edit">
-                            <button type="button" class="btn btn-warning btn-lg" v-show="!item.edited" @click="$emit('toggle-edited',item)">Edit</button>
-                            <button type="button" class="btn btn-success btn-lg" v-show="item.edited" @click="$emit('toggle-edited',item)">Check</button>
+                            <button type="button" class="btn btn-warning btn-lg" v-show="!item.edited"
+                                @click="$emit('toggle-edited',item)">Edit</button>
+                            <button type="button" class="btn btn-success btn-lg" v-show="item.edited"
+                                @click="$emit('toggle-edited',item)">Check</button>
                         </div>
 
                         <div v-if="trash">
-                            <button type="button" class="btn btn-danger btn-lg" @click="$emit('btn-trash', item)">Trash</button>
+                            <button type="button" class="btn btn-danger btn-lg"
+                                @click="$emit('btn-trash', item)">Trash</button>
                         </div>
                     </div>
                 </li>
@@ -112,6 +116,15 @@
                 localStorage.removeItem('notes');
                 localStorage.setItem('classesList', JSON.stringify(this.state));
                 localStorage.setItem('studentList', JSON.stringify(item.studentList));
+                if (localStorage.getItem('criteriaList')) {
+                    var criteres = JSON.parse(localStorage.getItem('criteriaList'));
+                    criteres.every(critere => {
+                        critere.averageMark = 0;
+                        critere.minMark = 0;
+                        critere.maxMark = 0;
+                    })
+                    localStorage.setItem('criteriaList', JSON.stringify(criteres));
+                }
             }
         }
 

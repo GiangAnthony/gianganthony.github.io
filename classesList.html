@@ -142,8 +142,18 @@
             },
             methods: {
                 btnTrash: function (className) {
-                    if(className.selected) {
+                    if (className.selected) {
                         localStorage.removeItem('studentList');
+                        localStorage.removeItem('notes');
+                        if (localStorage.getItem('criteriaList')) {
+                            var criteres = JSON.parse(localStorage.getItem('criteriaList'));
+                            criteres.every(critere => {
+                                critere.averageMark = 0;
+                                critere.minMark = 0;
+                                critere.maxMark = 0;
+                            })
+                            localStorage.setItem('criteriaList', JSON.stringify(criteres));
+                        }
                     }
                     store.remove(className)
                 },

@@ -192,11 +192,9 @@
             btnTrash: function (critere) {
                 if (localStorage.getItem('notes')) {
                     var notes = JSON.parse(localStorage.getItem('notes'));
-                    for (var i = 0; i < notes.length; i++) {
-                        if (notes[i].identifiantCritere == critere.id) {
-                            notes.splice(i, 1);
-                        }
-                    }
+                    notes.filter(function(note) {
+                        return note.identifiantCritere != critere.id;
+                    })
                     localStorage.setItem('notes', JSON.stringify(notes));
                 }
 

@@ -142,6 +142,9 @@
             },
             methods: {
                 btnTrash: function (className) {
+                    if(className.selected) {
+                        localStorage.removeItem('studentList');
+                    }
                     store.remove(className)
                 },
 

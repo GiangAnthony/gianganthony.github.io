@@ -48,12 +48,15 @@
                     </div>
                     <div class="right">
                         <div v-if="edit">
-                            <button type="button" class="btn btn-warning btn-lg" v-show="!item.edited" @click="$emit('toggle-edited',item)">Edit</button>
-                            <button type="button" class="btn btn-success btn-lg" v-show="item.edited" @click="$emit('toggle-edited',item)">Check</button>
+                            <button type="button" class="btn btn-warning btn-lg" v-show="!item.edited"
+                                @click="$emit('toggle-edited',item)">Edit</button>
+                            <button type="button" class="btn btn-success btn-lg" v-show="item.edited"
+                                @click="$emit('toggle-edited',item)">Check</button>
                         </div>
 
                         <div v-if="trash">
-                            <button type="button" class="btn btn-danger btn-lg" @click="$emit('btn-trash', item)">Trash</button>
+                            <button type="button" class="btn btn-danger btn-lg"
+                                @click="$emit('btn-trash', item)">Trash</button>
                         </div>
                     </div>
                 </li>
@@ -187,6 +190,16 @@
 
         methods: {
             btnTrash: function (critere) {
+                if (localStorage.getItem('notes')) {
+                    var notes = JSON.parse(localStorage.getItem('notes'));
+                    for (var i = 0; i < notes.length; i++) {
+                        if (notes[i].identifiantCritere == critere.id) {
+                            notes.splice(i, 1);
+                        }
+                    }
+                    localStorage.setItem('notes', JSON.stringify(notes));
+                }
+
                 store.remove(critere)
             },
 
